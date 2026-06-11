@@ -279,6 +279,7 @@ Project ini dibuat untuk tujuan pembelajaran, eksperimen, dan pengembangan porto
 ## 👨‍💻 Author
 
 **Khiky Ferdhian Prathama**
-**GaraGaraBug Studio**
+
+At **GaraGaraBug Studio**
 
 Mini Cloud Storage Aggregator — Unified Multi-Google Drive Storage Platform.
