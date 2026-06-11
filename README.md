@@ -260,12 +260,13 @@ http://localhost:5173
 
 ## 📷 Screenshot
 
-Tambahkan screenshot aplikasi di sini.
+### Dashboard
 
-```markdown
 ![Dashboard](screenshots/dashboard.png)
-![File Explorer](screenshots/explorer.png)
-```
+
+### File Explorer
+
+![File Explorer](screenshots/file-explorer.png)
 
 ---
 
