@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { HardDrive, Upload, RefreshCw, AlertCircle } from "lucide-react";
 import ProgressBar from "../components/ProgressBar";
-
 export default function Dashboard({
   storageData,
   loading,
@@ -12,7 +11,6 @@ export default function Dashboard({
   handleFileUpload,
 }) {
   const [isDragActive, setIsDragActive] = useState(false);
-
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -22,12 +20,10 @@ export default function Dashboard({
       setIsDragActive(false);
     }
   };
-
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const fakeEvent = {
         target: {
@@ -37,10 +33,9 @@ export default function Dashboard({
       handleFileUpload(fakeEvent);
     }
   };
-
   return (
     <div style={styles.page}>
-      {/* Topbar Dalam Konten */}
+      {}
       <div style={styles.topbar}>
         <h2 style={styles.pageTitle}>Overview Storage</h2>
         <button onClick={fetchStorageSummary} style={styles.refreshBtn}>
@@ -48,16 +43,14 @@ export default function Dashboard({
           <span>Refresh</span>
         </button>
       </div>
-
       {error && (
         <div style={styles.errorBox}>
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
-
       <div style={styles.grid}>
-        {/* KARTU 1: GABUNGAN STORAGE */}
+        {}
         <div style={styles.card}>
           <div style={styles.cardHeader}>
             <div
@@ -73,7 +66,6 @@ export default function Dashboard({
               <p style={styles.cardSub}>Total dari semua akun terhubung</p>
             </div>
           </div>
-
           {storageData?.total_combined_space_gb ? (
             <div style={{ marginTop: "15px" }}>
               <div style={styles.metaRow}>
@@ -102,8 +94,7 @@ export default function Dashboard({
             <p style={styles.infoText}>Memuat data...</p>
           )}
         </div>
-
-        {/* KARTU 2: QUICK UPLOAD */}
+        {}
         <div style={styles.card}>
           <div style={styles.cardHeader}>
             <div
@@ -119,8 +110,7 @@ export default function Dashboard({
               <p style={styles.cardSub}>Otomatis memilih akun paling longgar</p>
             </div>
           </div>
-
-          {/* AREA DRAG & DROP ZONE */}
+          {}
           <div
             onDragEnter={handleDrag}
             onDragOver={handleDrag}
@@ -174,8 +164,7 @@ export default function Dashboard({
           {uploadMessage && <p style={styles.uploadStatus}>{uploadMessage}</p>}
         </div>
       </div>
-
-      {/* TABEL DETAIL AKUN */}
+      {}
       {storageData?.accounts_detail && (
         <div style={{ ...styles.card, marginTop: "25px" }}>
           <h3 style={{ ...styles.cardTitle, marginBottom: "15px" }}>
@@ -212,7 +201,6 @@ export default function Dashboard({
     </div>
   );
 }
-
 const styles = {
   page: { padding: "5px 10px" },
   topbar: {
@@ -269,7 +257,6 @@ const styles = {
     fontWeight: "500",
   },
   infoText: { fontSize: "13px", color: "var(--text-muted)" },
-
   uploadContainer: {
     marginTop: "20px",
     border: "2px dashed var(--border-color)",
@@ -297,7 +284,6 @@ const styles = {
     fontSize: "12px",
     color: "var(--text-muted)",
   },
-
   uploadStatus: {
     fontSize: "13px",
     color: "#16a34a",

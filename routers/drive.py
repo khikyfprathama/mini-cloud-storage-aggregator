@@ -21,19 +21,16 @@ def get_gdrive_service(refresh_token: str):
         token_uri="https://oauth2.googleapis.com/token"
     )
     
-    # Memasukkan client_id & client_secret dari credentials.json ke objek creds
     with open(CLIENT_SECRETS_FILE, 'r') as f:
         data = json.load(f)
         web_data = data.get('web', data.get('installed', {}))
         creds._client_id = web_data.get('client_id')
         creds._client_secret = web_data.get('client_secret')
 
-    # Segarkan token untuk mendapatkan access token baru yang valid
     creds.refresh(Request())
     return build('drive', 'v3', credentials=creds)
 
 
-# --- FITUR 1: MONITORING TOTAL GABUNGAN SPACE ---
 @router.get("/storage-summary")
 def get_storage_summary():
     """Mengambil kuota dari semua akun, menjumlahkannya, dan mengupdate DB lokal"""
@@ -63,7 +60,6 @@ def get_storage_summary():
                 total_global_limit += limit
                 total_global_usage += usage
                 
-                # Caching: Update data kapasitas ke database lokal
                 cursor.execute(
                     "UPDATE accounts SET total_space = %s, used_space = %s WHERE id = %s",
                     (limit, usage, acc['id'])
@@ -99,7 +95,6 @@ def get_storage_summary():
         conn.close()
 
 
-# --- FITUR 2: SMART UPLOAD (MENCARI AKUN PALING SENGGANG + AUTO FOLDER) ---
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     """Otomatis mendeteksi akun paling kosong, membuat folder aplikasi, lalu mengunggah file ke dalam folder tersebut"""
@@ -107,7 +102,6 @@ async def upload_file(file: UploadFile = File(...)):
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # 1. Cari akun dengan sisa storage paling banyak
         query_find_best_account = """
         SELECT id, refresh_token, (total_space - used_space) as available_space 
         FROM accounts 
@@ -123,20 +117,16 @@ async def upload_file(file: UploadFile = File(...)):
         account_id = best_account['id']
         refresh_token = best_account['refresh_token']
         
-        # 2. Bangun service Google Drive
         service = get_gdrive_service(refresh_token)
         
-        # 3. KREASI FOLDER OTOMATIS: Cek apakah folder "Mini GDrive App" sudah ada di akun ini
         folder_name = "Mini GDrive App"
         query_check_folder = f"name = '{folder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
         folder_search = service.files().list(q=query_check_folder, fields="files(id)").execute()
         folders = folder_search.get('files', [])
         
         if folders:
-            # Jika folder sudah ada, ambil ID-nya
             folder_id = folders[0]['id']
         else:
-            # Jika folder belum ada, buat folder baru di root My Drive
             folder_metadata = {
                 'name': folder_name,
                 'mimeType': 'application/vnd.google-apps.folder'
@@ -144,20 +134,17 @@ async def upload_file(file: UploadFile = File(...)):
             new_folder = service.files().create(body=folder_metadata, fields='id').execute()
             folder_id = new_folder.get('id')
 
-        # 4. Siapkan metadata file dan masukkan folder_id sebagai 'parents'
         file_metadata = {
             'name': file.filename,
-            'parents': [folder_id] # <--- Ini baris sakti yang memasukkan file ke dalam folder khusus!
+            'parents': [folder_id] 
         }
         
         file_content = await file.read()
         media = MediaIoBaseUpload(io.BytesIO(file_content), mimetype=file.content_type, resumable=True)
         
-        # 5. Eksekusi upload ke Google Drive
         gdrive_file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         gdrive_file_id = gdrive_file.get('id')
         
-        # 6. Simpan rekam jejak lokasi file ke database lokal
         query_insert_file = """
         INSERT INTO files (account_id, gdrive_file_id, file_name, file_size, mime_type)
         VALUES (%s, %s, %s, %s, %s)
@@ -166,7 +153,6 @@ async def upload_file(file: UploadFile = File(...)):
             account_id, gdrive_file_id, file.filename, len(file_content), file.content_type
         ))
         
-        # Perbarui data cache used_space di DB lokal
         cursor.execute(
             "UPDATE accounts SET used_space = used_space + %s WHERE id = %s",
             (len(file_content), account_id)
@@ -186,7 +172,6 @@ async def upload_file(file: UploadFile = File(...)):
         cursor.close()
         conn.close()
 
-# --- FITUR 3: DOWNLOAD FILE PINTAR ---
 @router.get("/download/{file_id}")
 def download_file(file_id: int):
     """
@@ -198,7 +183,6 @@ def download_file(file_id: int):
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # 1. Cari data file di database lokal berdasarkan ID database kita
         query_find_file = """
         SELECT f.gdrive_file_id, f.file_name, f.mime_type, a.refresh_token 
         FROM files f
@@ -216,10 +200,8 @@ def download_file(file_id: int):
         mime_type = file_data['mime_type']
         refresh_token = file_data['refresh_token']
         
-        # 2. Bangun service Google Drive menggunakan akun pemilik file tersebut
         service = get_gdrive_service(refresh_token)
         
-        # 3. Request ke Google Drive API untuk mendownload media biner file
         request = service.files().get_media(fileId=gdrive_file_id)
         file_stream = io.BytesIO()
         
@@ -229,10 +211,8 @@ def download_file(file_id: int):
         while done is False:
             status, done = downloader.next_chunk()
             
-        # Pindahkan pointer stream kembali ke awal agar bisa dibaca dari awal oleh FastAPI
         file_stream.seek(0)
         
-        # 4. Kirim balik file sebagai data streaming biner ke browser user
         return StreamingResponse(
             file_stream, 
             media_type=mime_type, 
@@ -245,7 +225,6 @@ def download_file(file_id: int):
         cursor.close()
         conn.close()
         
-        # --- FITUR 4: AMBIL DAFTAR SEMUA FILE (FOR FILE EXPLORER) ---
 @router.get("/files")
 def get_all_files():
     """Mengambil daftar semua file dari database gabungan beserta info nama akunnya"""
@@ -269,7 +248,6 @@ def get_all_files():
         conn.close()
 
 
-# --- FITUR 5: HAPUS FILE (SMART DELETE) ---
 @router.delete("/file/{file_id}")
 def delete_file(file_id: int):
     """Menghapus file dari Google Drive asli sekaligus dari rekam jejak database lokal"""
@@ -277,7 +255,6 @@ def delete_file(file_id: int):
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # 1. Cari detail file dan token akun pemiliknya
         query_find = """
         SELECT f.gdrive_file_id, f.file_size, f.account_id, a.refresh_token 
         FROM files f
@@ -295,18 +272,14 @@ def delete_file(file_id: int):
         account_id = file_data['account_id']
         refresh_token = file_data['refresh_token']
         
-        # 2. Hapus file dari server Google Drive asli
         try:
             service = get_gdrive_service(refresh_token)
             service.files().delete(fileId=gdrive_file_id).execute()
         except Exception as g_err:
-            # Jika file sudah dihapus manual di GDrive, tetap lanjutkan hapus di DB lokal
             print(f"File mungkin sudah tidak ada di GDrive: {g_err}")
 
-        # 3. Hapus rekam jejak file dari database lokal
         cursor.execute("DELETE FROM files WHERE id = %s", (file_id,))
         
-        # 4. Kembalikan/Kurangi hitungan used_space di cache database lokal
         cursor.execute(
             "UPDATE accounts SET used_space = GREATEST(0, used_space - %s) WHERE id = %s",
             (file_size, account_id)
@@ -322,7 +295,6 @@ def delete_file(file_id: int):
         cursor.close()
         conn.close()
         
-# --- FITUR 6: LIHAT ISI FOLDER SECARA REAL-TIME ---
 @router.get("/list-folder")
 def list_folder_content(folder_id: str = None, account_id: int = None):
     """
@@ -333,7 +305,6 @@ def list_folder_content(folder_id: str = None, account_id: int = None):
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # 1. Jika akun belum ditentukan, pilih akun pertama yang ada di database
         if not account_id:
             cursor.execute("SELECT id, refresh_token FROM accounts LIMIT 1")
             acc = cursor.fetchone()
@@ -347,7 +318,6 @@ def list_folder_content(folder_id: str = None, account_id: int = None):
             
         service = get_gdrive_service(refresh_token)
         
-        # 2. Jika folder_id kosong, cari atau buat folder utama "Mini GDrive App"
         if not folder_id:
             query_main_folder = "name = 'Mini GDrive App' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
             search = service.files().list(q=query_main_folder, fields="files(id)").execute()
@@ -355,14 +325,11 @@ def list_folder_content(folder_id: str = None, account_id: int = None):
             if folders:
                 folder_id = folders[0]['id']
             else:
-                # Buat baru jika belum ada
                 meta = {'name': 'Mini GDrive App', 'mimeType': 'application/vnd.google-apps.folder'}
                 new_f = service.files().create(body=meta, fields='id').execute()
                 folder_id = new_f.get('id')
         
-        # 3. Tarik isi di dalam folder tersebut (baik file maupun sub-folder)
         query_content = f"'{folder_id}' in parents and trashed = false"
-        # Ambil field thumbnailLink untuk fitur preview gambar/video nantinya
         results = service.files().list(
             q=query_content, 
             fields="files(id, name, mimeType, size, thumbnailLink)",
@@ -382,7 +349,6 @@ def list_folder_content(folder_id: str = None, account_id: int = None):
         conn.close()
 
 
-# --- FITUR 7: BUAT SUB-FOLDER BARU ---
 @router.post("/create-folder")
 def create_sub_folder(name: str, parent_folder_id: str, account_id: int):
     """Membuat folder baru di dalam folder yang sedang dibuka"""

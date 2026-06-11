@@ -9,7 +9,6 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-
 export default function Sidebar({
   isOpen,
   setIsOpen,
@@ -25,7 +24,7 @@ export default function Sidebar({
         width: isOpen ? "var(--sidebar-width)" : "70px",
       }}
     >
-      {/* ATAS: LOGO & MENUS */}
+      {}
       <div>
         <div style={styles.brandContainer}>
           {isOpen ? (
@@ -44,7 +43,6 @@ export default function Sidebar({
             {isOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
-
         <nav style={styles.nav}>
           <button
             onClick={() => setActivePage("dashboard")}
@@ -70,7 +68,6 @@ export default function Sidebar({
             />
             {isOpen && <span style={styles.menuText}>Dashboard</span>}
           </button>
-
           <button
             onClick={() => setActivePage("files")}
             style={{
@@ -93,10 +90,9 @@ export default function Sidebar({
           </button>
         </nav>
       </div>
-
-      {/* BAWAH: TOGGLE THEME & FOOTER */}
+      {}
       <div>
-        {/* Tombol Toggle Tema */}
+        {}
         <div
           style={{ padding: "10px", display: "flex", justifyContent: "center" }}
         >
@@ -116,8 +112,7 @@ export default function Sidebar({
             )}
           </button>
         </div>
-
-        {/* Footer */}
+        {}
         <div
           style={{
             ...styles.footer,
@@ -141,7 +136,6 @@ export default function Sidebar({
     </div>
   );
 }
-
 const styles = {
   sidebar: {
     height: "100vh",
@@ -219,8 +213,6 @@ const styles = {
     color: "var(--text-muted)",
     margin: "2px 0 0 0",
   },
-
-  // Style Tombol Tema
   themeToggleBtn: {
     display: "flex",
     alignItems: "center",

@@ -2,15 +2,11 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import FileExplorer from "./pages/FileExplorer";
-
 const BACKEND_URL = "http://localhost:2387";
-
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState("dashboard");
-  const [darkMode, setDarkMode] = useState(false); // State baru untuk Dark Mode
-
-  // Efek samping untuk menyuntikkan class tema ke tag HTML utama
+  const [darkMode, setDarkMode] = useState(false); 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.setAttribute("data-theme", "dark");
@@ -18,14 +14,11 @@ export default function App() {
       document.documentElement.removeAttribute("data-theme");
     }
   }, [darkMode]);
-
-  // State Data global backend
   const [storageData, setStorageData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
-
   const fetchStorageSummary = async () => {
     setLoading(true);
     setError(null);
@@ -43,20 +36,16 @@ export default function App() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchStorageSummary();
   }, []);
-
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     setUploading(true);
     setUploadMessage("");
     const formData = new FormData();
     formData.append("file", file);
-
     try {
       const response = await fetch(`${BACKEND_URL}/drive/upload`, {
         method: "POST",
@@ -75,10 +64,9 @@ export default function App() {
       setUploading(false);
     }
   };
-
   return (
     <div style={{ display: "flex" }}>
-      {/* Komponen Navigasi Samping */}
+      {}
       <Sidebar
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
@@ -87,8 +75,7 @@ export default function App() {
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
-
-      {/* Container Halaman Utama Konten */}
+      {}
       <div
         style={{
           ...styles.contentContainer,
@@ -113,7 +100,6 @@ export default function App() {
     </div>
   );
 }
-
 const styles = {
   contentContainer: {
     flex: 1,

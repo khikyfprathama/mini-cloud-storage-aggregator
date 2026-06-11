@@ -1,5 +1,4 @@
 import React from 'react';
-
 export default function ProgressBar({ used, total }) {
   const percentage = total > 0 ? (used / total) * 100 : 0;
   return (
@@ -10,7 +9,6 @@ export default function ProgressBar({ used, total }) {
     </div>
   );
 }
-
 const styles = {
   container: { width: '100%', margin: '15px 0' },
   track: { width: '100%', height: '10px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' },

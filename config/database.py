@@ -1,15 +1,13 @@
 import mysql.connector
 from mysql.connector import pooling
 
-# Konfigurasi database MySQL
 db_config = {
     "host": "192.168.1.17",
-    "user": "root",       # Ubah jika username MySQL kamu berbeda
-    "password": "123",       # Isi jika MySQL kamu menggunakan password
+    "user": "root",       
+    "password": "123",       
     "database": "mini_gdrive"
 }
 
-# Membuat Connection Pool agar koneksi database efisien
 try:
     connection_pool = pooling.MySQLConnectionPool(
         pool_name="gdrive_pool",
@@ -29,7 +27,6 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Tabel Accounts (Menyimpan token tiap akun GDrive)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS accounts (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -41,7 +38,6 @@ def init_db():
     )
     """)
     
-    # 2. Tabel Files (Menyimpan metadata file yang diupload)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS files (
         id INT AUTO_INCREMENT PRIMARY KEY,

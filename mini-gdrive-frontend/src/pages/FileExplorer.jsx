@@ -10,28 +10,23 @@ import {
   Image,
   Eye,
 } from "lucide-react";
-
 const BACKEND_URL = "http://localhost:2387";
-
 export default function FileExplorer() {
   const [items, setItems] = useState([]);
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [accountId, setAccountId] = useState(null);
-  const [folderHistory, setFolderHistory] = useState([]); // Untuk mencatat jejak back button
+  const [folderHistory, setFolderHistory] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [newFolderName, setNewFolderName] = useState("");
   const [showFolderForm, setShowFolderForm] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(null); // State pop-up gambar
-
+  const [previewUrl, setPreviewUrl] = useState(null); 
   const loadFolderContent = async (folderId = null) => {
     setLoading(true);
     try {
       let url = `${BACKEND_URL}/drive/list-folder`;
       if (folderId) url += `?folder_id=${folderId}&account_id=${accountId}`;
-
       const response = await fetch(url);
       const res = await response.json();
-
       if (response.ok && res.status === "success") {
         setItems(res.items);
         setCurrentFolderId(res.current_folder_id);
@@ -43,12 +38,9 @@ export default function FileExplorer() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     loadFolderContent();
   }, []);
-
-  // Masuk ke dalam folder (Nested Folder Click)
   const handleFolderClick = (folderId, folderName) => {
     setFolderHistory([
       ...folderHistory,
@@ -56,20 +48,15 @@ export default function FileExplorer() {
     ]);
     loadFolderContent(folderId);
   };
-
-  // Kembali ke folder sebelumnya (Back Button)
   const handleBackClick = () => {
     const historyCopy = [...folderHistory];
-    const previousFolder = historyCopy.pop(); // Ambil folder terakhir
+    const previousFolder = historyCopy.pop(); 
     setFolderHistory(historyCopy);
     loadFolderContent(previousFolder ? previousFolder.id : null);
   };
-
-  // Membuat folder baru
   const handleCreateFolder = async (e) => {
     e.preventDefault();
     if (!newFolderName.trim()) return;
-
     try {
       const response = await fetch(
         `${BACKEND_URL}/drive/create-folder?name=${newFolderName}&parent_folder_id=${currentFolderId}&account_id=${accountId}`,
@@ -80,13 +67,12 @@ export default function FileExplorer() {
       if (response.ok) {
         setNewFolderName("");
         setShowFolderForm(false);
-        loadFolderContent(currentFolderId); // Reload isi folder
+        loadFolderContent(currentFolderId); 
       }
     } catch (err) {
       alert("Gagal membuat folder.");
     }
   };
-
   const formatBytes = (bytes) => {
     if (!bytes) return "-";
     const k = 1024;
@@ -94,10 +80,9 @@ export default function FileExplorer() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
-
   return (
     <div style={styles.page}>
-      {/* Tombol Aksi Atas */}
+      {}
       <div style={styles.topbar}>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           {folderHistory.length > 0 && (
@@ -111,7 +96,6 @@ export default function FileExplorer() {
               : folderHistory[folderHistory.length - 1].name}
           </h2>
         </div>
-
         <button
           onClick={() => setShowFolderForm(!showFolderForm)}
           style={styles.newFolderBtn}
@@ -120,8 +104,7 @@ export default function FileExplorer() {
           <span>Folder Baru</span>
         </button>
       </div>
-
-      {/* Form Pembuatan Folder Baru */}
+      {}
       {showFolderForm && (
         <form onSubmit={handleCreateFolder} style={styles.folderForm}>
           <input
@@ -143,8 +126,7 @@ export default function FileExplorer() {
           </button>
         </form>
       )}
-
-      {/* Tampilan Grid/Tabel Item */}
+      {}
       <div style={styles.card}>
         {loading ? (
           <div style={styles.center}>
@@ -166,10 +148,9 @@ export default function FileExplorer() {
               const isFolder =
                 item.mimeType === "application/vnd.google-apps.folder";
               const isImage = item.mimeType.startsWith("image/");
-
               return (
                 <div key={item.id} style={styles.itemCard}>
-                  {/* Bagian Visual/Preview Atas */}
+                  {}
                   <div style={styles.previewArea}>
                     {isFolder ? (
                       <Folder
@@ -187,8 +168,7 @@ export default function FileExplorer() {
                       <File size={50} color="#94a3b8" />
                     )}
                   </div>
-
-                  {/* Detil Info Bawah */}
+                  {}
                   <div style={styles.itemInfo}>
                     <p style={styles.itemName} title={item.name}>
                       {item.name}
@@ -197,8 +177,7 @@ export default function FileExplorer() {
                       {isFolder ? "Folder" : formatBytes(item.size)}
                     </p>
                   </div>
-
-                  {/* Tombol Aksi Hover/Bawah */}
+                  {}
                   <div style={styles.actions}>
                     {isFolder ? (
                       <button
@@ -252,8 +231,7 @@ export default function FileExplorer() {
           </div>
         )}
       </div>
-
-      {/* MODAL POP-UP UNTUK PREVIEW GAMBAR BESAR */}
+      {}
       {previewUrl && (
         <div style={styles.modalOverlay} onClick={() => setPreviewUrl(null)}>
           <div style={styles.modalContent}>
@@ -264,7 +242,6 @@ export default function FileExplorer() {
     </div>
   );
 }
-
 const styles = {
   page: { padding: "5px 10px" },
   topbar: {
