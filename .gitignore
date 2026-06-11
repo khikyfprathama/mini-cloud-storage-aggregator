@@ -1,0 +1,24 @@
+# === BACKEND SECURITY ===
+# Mengamankan file kredensial Google API kamu dari publik
+credentials/credentials.json
+token.json
+
+# Mengabaikan file sistem Python & cache lokal Laragon
+__pycache__/
+*.pyc
+.env
+venv/
+.pytest_cache/
+
+# === FRONTEND SECURITY (Karena posisinya ada di dalam backend) ===
+# Mengabaikan folder dependency node_modules yang ukurannya ratusan MB
+mini-gdrive-frontend/node_modules/
+mini-gdrive-frontend/dist/
+mini-gdrive-frontend/.env.local
+mini-gdrive-frontend/.env.*.local
+
+# === OS & IDE FILES ===
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
