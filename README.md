@@ -270,22 +270,6 @@ http://localhost:5173
 
 ---
 
-## 🔒 Keamanan
-
-File berikut tidak boleh diunggah ke GitHub:
-
-```gitignore
-credentials/
-token.json
-.env
-__pycache__/
-node_modules/
-```
-
-Pastikan file `credentials.json` dan refresh token tidak pernah dipublikasikan.
-
----
-
 ## 📄 Lisensi
 
 Project ini dibuat untuk tujuan pembelajaran, eksperimen, dan pengembangan portofolio.
@@ -295,5 +279,6 @@ Project ini dibuat untuk tujuan pembelajaran, eksperimen, dan pengembangan porto
 ## 👨‍💻 Author
 
 **Khiky Ferdhian Prathama**
+**GaraGaraBug Studio**
 
 Mini Cloud Storage Aggregator — Unified Multi-Google Drive Storage Platform.
